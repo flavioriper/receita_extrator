@@ -31,10 +31,9 @@ class Extrator extends CI_Controller {
 		if ($estadoAtual->ocupado == 0) {
 			$myfile = fopen("extract_backend/extract/configuracao_busca.txt", "w");
 			if (fwrite($myfile, $busca)) {
-				echo '200';
 
-				$command = escapeshellcmd('python extract_backend/helper/functions.py');
-				shell_exec($command);
+				// $command = escapeshellcmd('python extract_backend/helper/functions.py');
+				// shell_exec($command);
 
 			}
 			fclose($myfile);

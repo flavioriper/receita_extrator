@@ -13,16 +13,23 @@
             }
         }
     }
+
+    function pad(str, max) {
+        str = str.toString();
+        return str.length < max ? pad("0" + str, max) : str;
+    }
     
     function montarEstados(lista) {
-        $.each($(".busca-estado:checked"), function(){            
-            lista.push($(this).val())
+        $.each($(".busca-estado:checked"), function(){
+            let estado = $(this).val()
+            lista.push(estado)
         })
     }
 
     function montarTamanhos(lista) {
-        $.each($(".busca-tamanho:checked"), function(){            
-            lista.push($(this).val())
+        $.each($(".busca-tamanho:checked"), function(){
+            let tamanho = $(this).val()          
+            lista.push(pad(tamanho, 2))
         })
     }
 
@@ -74,13 +81,14 @@
                                 Infelizmente não pudemos realizar sua busca, o sistema já está realizando outra consulta neste momento,
                                 espere que esta outra consulta finalize para que possamos atender sua demanda.
                             `)
-                        } else {
+                            $('#respostaServidor').modal('show')
+                        } else if (data != '400' && data != '') {
                             $('#consulta-resposta').text(`
                                 Ocorreu um erro durante a solicitação. Por favor entre em contato com o administrador do sistema.
                             `)
                             console.log(data)
+                            $('#respostaServidor').modal('show')
                         }
-                        $('#respostaServidor').modal('show')
                     }
                 })
             })
