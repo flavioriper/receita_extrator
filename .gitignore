@@ -10,7 +10,7 @@ application/logs/*
 
 composer.lock
 arquivos_receita/
-assets/download
+assets/download/
 
 user_guide_src/build/*
 user_guide_src/cilexer/build/*
