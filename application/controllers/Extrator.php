@@ -1,5 +1,7 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class Extrator extends CI_Controller {
 
@@ -24,21 +26,71 @@ class Extrator extends CI_Controller {
 
 	public function registrar_consulta() {
 		$busca = $this->input->post('busca');
+		$busca = json_decode($busca);
 		$myfile = fopen("extract_backend/extract/configuracao_busca.txt", "r");
 		$estadoAtual = fread($myfile, filesize("extract_backend/extract/configuracao_busca.txt"));
-		$estadoAtual = json_decode($estadoAtual);
 		fclose($myfile);
-		if ($estadoAtual->ocupado == 0) {
-			$myfile = fopen("extract_backend/extract/configuracao_busca.txt", "w");
-			if (fwrite($myfile, $busca)) {
-
-				// $command = escapeshellcmd('python extract_backend/helper/functions.py');
-				// shell_exec($command);
-
-			}
-			fclose($myfile);
+		if ($estadoAtual == '') {
+			$busca->fila = 1;
+			$output = json_encode(array($busca));
 		} else {
-			echo '400';
+			$output = json_decode($estadoAtual);
+			$validacao = true;
+			foreach($output as $item) {
+				if ($item->cnaes == $busca->cnaes && $item->estados == $busca->estados && $item->tamanhos == $busca->tamanhos) {
+					$validacao = false;
+				}
+			}
+			if ($validacao) {
+				$busca->fila = end($output)->fila + 1;
+				array_push($output, $busca);
+			}
+			$output = json_encode($output);
+		}
+		$myfile = fopen("extract_backend/extract/configuracao_busca.txt", "w");
+		if (fwrite($myfile, $output) && $estadoAtual == '') {
+
+			// $command = escapeshellcmd('python extract_backend/helper/functions.py');
+			// shell_exec($command);
+
+		}
+		fclose($myfile);
+	}
+
+	public function limpar_fila() {
+		if ($this->input->post('link')) {
+
+			$link = $this->input->post('link');
+			$link = base_url('assets/download/'.$link);
+
+			$myfile = fopen("extract_backend/extract/configuracao_busca.txt", "r");
+			$estadoAtual = fread($myfile, filesize("extract_backend/extract/configuracao_busca.txt"));
+			fclose($myfile);
+
+			$estadoAtual = json_decode($estadoAtual);
+			$email = $estadoAtual[0]->email;
+			unset($estadoAtual[0]);
+			$output = array();
+
+			if (count($estadoAtual) > 0) {
+				foreach($estadoAtual as $estado) {
+					array_push($output, $estado);
+				}
+				$output = json_encode($output);
+			} else {
+				$output = '';
+			}
+
+			$myfile = fopen("extract_backend/extract/configuracao_busca.txt", "w");
+			fwrite($myfile, $output);
+			fclose($myfile);
+
+			$this->load->library('email');
+			$this->email->from('teste@teste.com.br', 'InExtractor');
+			$this->email->to($email);
+			$this->email->subject('Link para download da extração');
+			$this->email->message($link);
+			$this->email->send();
 		}
 	}
 

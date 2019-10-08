@@ -1,4 +1,12 @@
 <script>
+
+    function deleteSpecialChar(txtName) {
+        if (txtName.value != '' && txtName.value.match(/^[\w ]+$/) == null) 
+        {
+            txtName.value = txtName.value.replace(/[\W]/g, '');
+        }
+    }
+
     function montarCnaes(lista) {
         $('#cnaes-escolhidos').html('')
         lista.forEach(cnae => {
@@ -22,14 +30,23 @@
     function montarEstados(lista) {
         $.each($(".busca-estado:checked"), function(){
             let estado = $(this).val()
-            lista.push(estado)
+            if (!lista.includes(estado)) {
+                lista.push(estado)
+            }
         })
+    }
+
+    function isEmail(email) {
+        var regex = /^([a-zA-Z0-9_.+-])+\@(([a-zA-Z0-9-])+\.)+([a-zA-Z0-9]{2,4})+$/;
+        return regex.test(email);
     }
 
     function montarTamanhos(lista) {
         $.each($(".busca-tamanho:checked"), function(){
-            let tamanho = $(this).val()          
-            lista.push(pad(tamanho, 2))
+            let tamanho = $(this).val()
+            if (!lista.includes(tamanho)) {
+                lista.push(pad(tamanho, 2))
+            }
         })
     }
 
@@ -43,7 +60,7 @@
             source: "<?=base_url();?>extrator/get_cnaes",
             minLength: 3,
             select: function( event, ui ) {
-                let cnae = ui.item.id
+                let cnae = ui.item.value
                 if (!cnaeList.includes(cnae)) {
                     cnaeList.push(cnae)
                 }
@@ -60,37 +77,35 @@
         })
 
         $('#solicitacao-insight').click(function() {
+            let nomeArquivo = $('#nome_arquivo').val()
+            let email = $('#email').val()
+            if (nomeArquivo == '') {
+                $('#erro-corpo').text('É necessário definir um nome para seu arquivo, apenas assim conseguimos garantir que você receba as informações corretas.')
+                $('#erroEnvio').modal('show')
+                return false
+            }
+            if (!isEmail(email)) {
+                $('#erro-corpo').text('É necessário um e-mail válido para o campo de e-mail.')
+                $('#erroEnvio').modal('show')
+                return false
+            }
             montarEstados(estadoList)
             montarTamanhos(tamanhoList)
             let busca = new Object()
-            busca.ocupado = 1
-            busca.cnaes = cnaeList
+            busca.cnaes = cnaeList.map(element => element.substring(0, element.indexOf(' |')))
             busca.estados = estadoList
             busca.tamanhos = tamanhoList
+            busca.nome = nomeArquivo
+            busca.email = email
             busca = JSON.stringify(busca)
-
             $('#confirmacaoEnvio').modal('show')
-            $('#confirmacaoEnvio').on('hidden.bs.modal', function () {
-                $.ajax({
-                    url: "<?=base_url('extrator/registrar_consulta')?>",
-                    type: 'POST',
-                    data: { busca },
-                    success: function(data) {
-                        if (data == '400') {
-                            $('#consulta-resposta').text(`
-                                Infelizmente não pudemos realizar sua busca, o sistema já está realizando outra consulta neste momento,
-                                espere que esta outra consulta finalize para que possamos atender sua demanda.
-                            `)
-                            $('#respostaServidor').modal('show')
-                        } else if (data != '400' && data != '') {
-                            $('#consulta-resposta').text(`
-                                Ocorreu um erro durante a solicitação. Por favor entre em contato com o administrador do sistema.
-                            `)
-                            console.log(data)
-                            $('#respostaServidor').modal('show')
-                        }
-                    }
-                })
+            $.ajax({
+                url: "<?=base_url('extrator/registrar_consulta')?>",
+                type: 'POST',
+                data: { busca },
+                success: function(data) {
+                    
+                }
             })
 
         })

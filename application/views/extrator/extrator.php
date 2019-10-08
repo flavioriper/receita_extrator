@@ -1,6 +1,37 @@
 <div class="row py-3">
     <div class="col-10 m-auto py-3">
         <div class="col-12">
+            <h1 class="ml-4">Digite o nome do arquivo <span class="small">(Será o nome do arquivo para referência ao final, escolha um nome objetivo)</span></h1>
+            <div class="container-fix p-3">
+                <input 
+                    id="nome_arquivo" 
+                    placeholder="Informe o nome do arquivo"
+                    name="nome_arquivo" 
+                    type="text" 
+                    class="form-control" 
+                    aria-required="true" 
+                    aria-invalid="false"
+                    onkeyup="javascript:deleteSpecialChar(this)">
+            </div>
+        </div>
+    </div>
+    <div class="col-10 m-auto py-3">
+        <div class="col-12">
+            <h1 class="ml-4">Digite o e-mail para envio do arquivo finalizado</h1>
+            <div class="container-fix p-3">
+                <input 
+                    id="email" 
+                    placeholder="Informe um e-mail inhouse válido"
+                    name="email" 
+                    type="text" 
+                    class="form-control" 
+                    aria-required="true" 
+                    aria-invalid="false">
+            </div>
+        </div>
+    </div>
+    <div class="col-10 m-auto py-3">
+        <div class="col-12">
             <h1 class="ml-4">Por estado <span class="small">(Não altere para selecionar todos os estados)</span></h1>
             <div class="container-fix p-3 pl-5">
                 <?php foreach($estados as $estado) {?>
@@ -41,7 +72,7 @@
                             <input
                                 type="checkbox"
                                 name="busca-tamanho"
-                                value="<?=$porte->id?>"
+                                value="<?=$porte->codigo?>"
                                 class="form-check-input busca-tamanho"><?=$porte->descricao?>
                         </label>
                     <?php } ?>
@@ -68,8 +99,7 @@
                 </button>
             </div>
             <div class="modal-body">
-                <p>Sua consulta foi enviada aos servidores para análise. Se aprovada basta aguardar que logo enviaremos o linnk de download
-                para o e-mail cadastrado. Caso contrário você receberá um aviso ao fechar este modal.</p>
+                <p>Sua consulta foi enviada para a fila. Assim que estiver disponível enviaremos um e-mail com o link para download.</p>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-primary" data-dismiss="modal">Confirmar</button>
@@ -78,21 +108,21 @@
     </div>
 </div>
 
-<!-- Modal de confirmação de envio -->
-<div class="modal fade" id="respostaServidor" tabindex="-1" role="dialog" aria-labelledby="respostaServidorLabel" aria-hidden="true" style="display: none;">
+<!-- Modal de erro do servidor -->
+<div class="modal fade" id="erroEnvio" tabindex="-1" role="dialog" aria-labelledby="erroEnvioLabel" aria-hidden="true" style="display: none;">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="respostaServidorLabel">Atenção</h5>
+                <h5 class="modal-title" id="erroEnvioLabel">Atenção</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">×</span>
                 </button>
             </div>
             <div class="modal-body">
-                <p id="consulta-resposta"></p>
+                <p id="erro-corpo"></p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary" data-dismiss="modal">Confirmar</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Fechar</button>
             </div>
         </div>
     </div>
